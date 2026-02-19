@@ -2,75 +2,109 @@ import tkinter as tk
 import random
 
 root = tk.Tk()
-root.title("Rock Paper Scissors")
-root.geometry("400x450")
-root.config(bg="#7579AD")
+root.title("Ultra Battle Arena: Pro Edition ⚔️")
+root.geometry("500x650") 
+root.config(bg="#848c8c") 
 
-choices = ["Rock", "Paper", "Scissors"]
-user_score = 0
-computer_score = 0
+player_score = 0
+comp_score = 0
+
+game_data = {
+    "Rock": {"emoji": "✊", "color": "#4e4e4e"},
+    "Paper": {"emoji": "✋", "color": "#3498db"},
+    "Scissors": {"emoji": "✌", "color": "#9b59b6"}
+}
+
+choices = list(game_data.keys())
+
+
+
+title = tk.Label(root, text="ROCK PAPER SCISSORS🎮!",font=("Impact", 32), bg="#848c8c", fg="#101211")
+title.pack(pady=20)
+
+
+score_frame = tk.Frame(root, bg="#1a1a2e")
+score_frame.pack(pady=10)
+
+score_label = tk.Label(score_frame, 
+                       text=f"YOU: {player_score}  |  COMP: {comp_score}", 
+                       font=("Verdana", 18, "bold"), 
+                       bg="#848c8c", fg="#f5980c")
+score_label.pack()
+
+
+arena_frame = tk.Frame(root, bg="#16213e", bd=0, highlightbackground="#fffeed", highlightthickness=2)
+arena_frame.pack(pady=10, padx=30, fill="x")
+
+player_label = tk.Label(arena_frame, text="YOU\n❓", font=("Verdana", 20, "bold"), bg="#16213e", fg="#00d2ff")
+player_label.grid(row=0, column=0, padx=40, pady=30)
+
+vs_label = tk.Label(arena_frame, text="VS", font=("Impact", 24), bg="#16213e", fg="#177a3d")
+vs_label.grid(row=0, column=1)
+
+comp_label = tk.Label(arena_frame, text="COMP\n❓", font=("Verdana", 20, "bold"), bg="#16213e", fg="#ff9f43")
+comp_label.grid(row=0, column=2, padx=40, pady=30)
+
+status_label = tk.Label(root, text="READY FOR BATTLE?", font=("Segoe UI", 16, "bold"), bg="#848c8c", fg="#ffffff")
+status_label.pack(pady=20)
+
+
+def update_score():
+    score_label.config(text=f"YOU: {player_score}  |  COMP: {comp_score}")
 
 def play(user_choice):
-    global user_score, computer_score
-    
+    global player_score, comp_score
     computer_choice = random.choice(choices)
     
-    user_label.config(text=f"You chose: {user_choice}")
-    comp_label.config(text=f"Computer chose: {computer_choice}")
-    
+
+    player_label.config(text=f"YOU\n{game_data[user_choice]['emoji']}")
+    comp_label.config(text=f"COMP\n{game_data[computer_choice]['emoji']}")
+
+
     if user_choice == computer_choice:
-        result = "It's a Tie!"
-    elif (
-        (user_choice == "Rock" and computer_choice == "Scissors") or
-        (user_choice == "Paper" and computer_choice == "Rock") or
-        (user_choice == "Scissors" and computer_choice == "Paper")
-    ):
-        result = "You Win!"
-        user_score += 1
+        result = "DRAW! 🤝"
+        res_color = "#95a5a6"
+    elif (user_choice == "Rock" and computer_choice == "Scissors") or \
+         (user_choice == "Paper" and computer_choice == "Rock") or \
+         (user_choice == "Scissors" and computer_choice == "Paper"):
+        result = "YOU DOMINATED! 🏆"
+        res_color = "#2ecc71"
+        player_score += 1 
     else:
-        result = "Computer Wins!"
-        computer_score += 1
-    
-    result_label.config(text=result)
-    score_label.config(text=f"Score - You: {user_score}  Computer: {computer_score}")
+        result = "COMP WINS! 💀"
+        res_color = "#e74c3c"
+        comp_score += 1 
+
+    status_label.config(text=result, fg=res_color)
+    update_score()
 
 def reset_game():
-    global user_score, computer_score
-    user_score = 0
-    computer_score = 0
-    user_label.config(text="You chose: ")
-    comp_label.config(text="Computer chose: ")
-    result_label.config(text="")
-    score_label.config(text="Score - You: 0  Computer: 0")
+    global player_score, comp_score
+    player_score = 0
+    comp_score = 0
+    player_label.config(text="YOU\n❓")
+    comp_label.config(text="COMP\n❓")
+    status_label.config(text="ARENA RESET!", fg="#ffffff")
+    update_score()
 
-title = tk.Label(root, text="Rock Paper Scissors", font=("Arial", 18, "bold"), bg="#7579AD")
-title.pack(pady=10)
 
-user_label = tk.Label(root, text="You chose: ", font=("Arial", 12), bg="#7579AD")
-user_label.pack(pady=5)
 
-comp_label = tk.Label(root, text="Computer chose: ", font=("Arial", 12), bg="#7579AD")
-comp_label.pack(pady=5)
+btn_frame = tk.Frame(root, bg="#1a1a2e")
+btn_frame.pack(pady=10)
 
-result_label = tk.Label(root, text="", font=("Arial", 14, "bold"), fg="blue", bg="#7579AD")
-result_label.pack(pady=10)
+def create_action_btn(choice):
+    data = game_data[choice]
+    return tk.Button(btn_frame, text=f"{data['emoji']} {choice}", font=("Arial", 11, "bold"),
+                    width=10, height=2, bg=data['color'], fg="white", bd=0, cursor="hand2",
+                    command=lambda: play(choice))
 
-button_frame = tk.Frame(root, bg="#7579AD")
-button_frame.pack(pady=20)
+create_action_btn("Rock").grid(row=0, column=0, padx=8)
+create_action_btn("Paper").grid(row=0, column=1, padx=8)
+create_action_btn("Scissors").grid(row=0, column=2, padx=8)
 
-rock_btn = tk.Button(button_frame, text="Rock", width=10, command=lambda: play("Rock"))
-rock_btn.grid(row=0, column=0, padx=5)
 
-paper_btn = tk.Button(button_frame, text="Paper", width=10, command=lambda: play("Paper"))
-paper_btn.grid(row=0, column=1, padx=5)
-
-scissors_btn = tk.Button(button_frame, text="Scissors", width=10, command=lambda: play("Scissors"))
-scissors_btn.grid(row=0, column=2, padx=5)
-
-reset_btn = tk.Button(root, text="Reset Game", width=15, bg="red", fg="white", command=reset_game)
-reset_btn.pack(pady=15)
-
-score_label = tk.Label(root, text="Score - You: 0  Computer: 0", font=("Arial", 12), bg="#7579AD")
-score_label.pack(pady=5)
+reset_btn = tk.Button(root, text="RESET SCORE & ARENA", font=("Arial", 9, "bold"),
+                      bg="#1a1a2e", fg="#e94560", relief="flat", command=reset_game)
+reset_btn.pack(pady=30)
 
 root.mainloop()
