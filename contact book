@@ -1,0 +1,145 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
+import sqlite3
+
+# Database Setup
+def init_db():
+    conn = sqlite3.connect("my_contacts.db")
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS contacts 
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       name TEXT, phone TEXT, email TEXT, address TEXT)''')
+    conn.commit()
+    conn.close()
+
+class FullContactApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Advanced Contact Manager")
+        self.root.geometry("1000x600")
+        self.root.configure(bg="#fdfefe") # Clean White/Blue background
+
+        init_db()
+
+        # --- Sidebar Style ---
+        side_frame = tk.Frame(root, bg="#2c3e50", width=300) # Dark Navy Blue Sidebar
+        side_frame.pack(side="left", fill="y")
+
+        tk.Label(side_frame, text="CONTACT MENU", font=("Helvetica", 16, "bold"), bg="#2c3e50", fg="white").pack(pady=30)
+
+        # Input Fields in Sidebar
+        self.labels = ["Name", "Phone", "Email", "Address"]
+        self.entries = {}
+
+        for label in self.labels:
+            tk.Label(side_frame, text=label, bg="#2c3e50", fg="#ecf0f1", font=("Arial", 10)).pack(anchor="w", padx=20)
+            entry = tk.Entry(side_frame, font=("Arial", 11), bd=0)
+            entry.pack(fill="x", padx=20, pady=(0, 15), ipady=5)
+            self.entries[label] = entry
+
+        # --- BUTTONS SECTION ---
+        # 1. ADD Button (Yellow)
+        self.btn_add = tk.Button(side_frame, text="➕ ADD TO LIST", bg="#f1c40f", fg="black", font=("Arial", 10, "bold"), 
+                                 command=self.add_to_table, bd=0, cursor="hand2")
+        self.btn_add.pack(fill="x", padx=20, pady=5, ipady=8)
+
+        # 2. SAVE Button (Green)
+        self.btn_save = tk.Button(side_frame, text="💾 SAVE TO DATABASE", bg="#27ae60", fg="white", font=("Arial", 10, "bold"), 
+                                  command=self.save_to_db, bd=0, cursor="hand2")
+        self.btn_save.pack(fill="x", padx=20, pady=5, ipady=8)
+
+        # 3. DELETE Button (Red)
+        self.btn_delete = tk.Button(side_frame, text="🗑️ DELETE CONTACT", bg="#e74c3c", fg="white", font=("Arial", 10, "bold"), 
+                                    command=self.delete_contact, bd=0, cursor="hand2")
+        self.btn_delete.pack(fill="x", padx=20, pady=5, ipady=8)
+
+        # 4. CLEAR Button (Light Blue)
+        self.btn_clear = tk.Button(side_frame, text="🧹 CLEAR FORM", bg="#3498db", fg="white", font=("Arial", 10, "bold"), 
+                                   command=self.clear_form, bd=0, cursor="hand2")
+        self.btn_clear.pack(fill="x", padx=20, pady=5, ipady=8)
+
+        # --- Main View (Table) ---
+        main_frame = tk.Frame(root, bg="#ecf0f1")
+        main_frame.pack(side="right", expand=True, fill="both", padx=10, pady=10)
+
+        # Treeview Styling
+        style = ttk.Style()
+        style.configure("Treeview", font=("Arial", 10), rowheight=30)
+        style.configure("Treeview.Heading", font=("Arial", 11, "bold"))
+
+        cols = ("ID", "Name", "Phone", "Email", "Address")
+        self.tree = ttk.Treeview(main_frame, columns=cols, show="headings")
+        
+        for col in cols:
+            self.tree.heading(col, text=col)
+            self.tree.column(col, width=100)
+
+        self.tree.pack(fill="both", expand=True)
+        self.load_from_db()
+
+    # Functions
+    def add_to_table(self):
+        # Ye function bina database ke table mein dikhayega
+        data = [self.entries[l].get() for l in self.labels]
+        if data[0] and data[1]:
+            self.tree.insert("", tk.END, values=("Temp", *data))
+        else:
+            messagebox.showwarning("Error", "Name aur Phone zaroori hai!")
+
+    def save_to_db(self):
+        # Ye function permanent save karega
+        name, phone, email, addr = [self.entries[l].get() for l in self.labels]
+        if name and phone:
+            conn = sqlite3.connect("my_contacts.db")
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO contacts (name, phone, email, address) VALUES (?, ?, ?, ?)", 
+                           (name, phone, email, addr))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Success", "Data Database mein save ho gaya!")
+            self.clear_form()
+            self.load_from_db()
+        else:
+            messagebox.showerror("Error", "Save karne ke liye details bhariye.")
+
+    def load_from_db(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        conn = sqlite3.connect("my_contacts.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM contacts")
+        for row in cursor.fetchall():
+            self.tree.insert("", tk.END, values=row)
+        conn.close()
+
+    def delete_contact(self):
+        selected = self.tree.selection()
+        if selected:
+            item = self.tree.item(selected)['values']
+            if item[0] == "Temp":
+                self.tree.delete(selected)
+            else:
+                conn = sqlite3.connect("my_contacts.db")
+                cursor = conn.cursor()
+                cursor.execute("DELETE FROM contacts WHERE id=?", (item[0],))
+                conn.commit()
+                conn.close()
+                self.load_from_db()
+            messagebox.showinfo("Deleted", "Contact delete ho gaya.")
+        else:
+            messagebox.showwarning("Select", "Pehle contact select karein.")
+
+    def clear_form(self):
+        for entry in self.entries.values():
+            entry.delete(0, tk.END)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = FullContactApp(root)
+    root.mainloop()
+
+    
+ 
+
+
+       
