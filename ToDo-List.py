@@ -7,7 +7,6 @@ root.title("To-Do List")
 root.geometry("500x500")
 root.config(bg="#f5f6fa")
 
-# ---------------- Functions ---------------- #
 
 def add_task():
     task = entry.get()
@@ -49,7 +48,6 @@ def track_task():
     except:
         messagebox.showwarning("Warning", "Select a task to track!")
 
-# ---------------- UI Design ---------------- #
 
 title = tk.Label(root, text="TO-DO LIST", 
                  font=("Segoe UI", 20, "bold"), 
