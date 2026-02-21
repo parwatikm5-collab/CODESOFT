@@ -1,3 +1,4 @@
+
 import tkinter as tk
 import random
 
@@ -84,7 +85,7 @@ def reset_game():
     comp_score = 0
     player_label.config(text="YOU\n❓")
     comp_label.config(text="COMP\n❓")
-    status_label.config(text="ARENA RESET!", fg="#ffffff")
+    status_label.config(text="RESET!", fg="#ffffff")
     update_score()
 
 
@@ -103,7 +104,7 @@ create_action_btn("Paper").grid(row=0, column=1, padx=8)
 create_action_btn("Scissors").grid(row=0, column=2, padx=8)
 
 
-reset_btn = tk.Button(root, text="RESET SCORE & ARENA", font=("Arial", 9, "bold"),
+reset_btn = tk.Button(root, text="RESET SCORE", font=("Arial", 9, "bold"),
                       bg="#1a1a2e", fg="#e94560", relief="flat", command=reset_game)
 reset_btn.pack(pady=30)
 
