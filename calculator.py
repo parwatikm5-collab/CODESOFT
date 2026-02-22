@@ -61,11 +61,12 @@ for btn in buttons:
             width=5, height=2,
             font=("Arial",14),
             bg="#ecf0f1",
-            command=lambda x=btn:
-click(x)
+            command=lambda x=btn: click(x)
         )
+
     b.grid(row=row, column=col, padx=5, pady=5)
     col += 1
+
     if col == 4:
         col = 0
         row += 1
